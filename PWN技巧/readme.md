@@ -25,19 +25,17 @@ shellcode = asm(shellcraft.sh())
 
 ## 0x002-敏感函数
 
-### printf
-
-### scanf
-
-### puts
-
-### gets
-
-### read
-
-### write
-
-### strcpy
+|  敏感函数  |  结束标志  |
+|  :----:  | :----:  |
+|  printf  |  \x00  |
+|  scanf  |    |
+|  puts  |    |
+|  gets  |  \x0A  |
+|  read  |    |
+|  write  |    |
+|  strcpy  |    |
+|  strcmp  |  \x00  |
+|  strlen  |  \x00  |
 
 ## 0x003-泄露libc地址
 
