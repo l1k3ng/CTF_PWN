@@ -116,3 +116,17 @@ https://www.wangan.com/docs/1081
 |  59  |  execve  |
 
 https://blog.csdn.net/sinat_26227857/article/details/44244433
+
+## 0x006-栈对齐
+
+在ubuntu18以上的版本，64位程序中如果调用system("/bin/sh")，则需要考虑堆栈平衡问题。
+
+因为在ubuntu18以上的版本，64位的程序中调用system函数时，有如下指令
+
+![](2.png)
+
+> movaps : 该指令必须16字节对齐，说明 **$rsp+0x40** 处的地址值必须是16的倍数
+
+那么就需要在调用call system时，保证 **$rsp+0x40** 处的地址值是16的倍数，下图是没对齐的情况
+
+![](3.png)
