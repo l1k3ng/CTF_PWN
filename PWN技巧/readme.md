@@ -128,3 +128,9 @@ https://blog.csdn.net/sinat_26227857/article/details/44244433
 那么就需要在调用call system时，保证 **$rsp+0x40** 处的地址值是16的倍数，下图是没对齐的情况
 
 ![](3.png)
+
+## 0x007-常用汇编指令
+
+|  汇编语言  |  机器码  |  含义  |
+|  :----:  | :----:  | :----:  |
+|  leave  |  0xc9  | mov esp, ebp; <br> pop ebp; |
