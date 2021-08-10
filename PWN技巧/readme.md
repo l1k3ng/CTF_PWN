@@ -25,19 +25,17 @@ shellcode = asm(shellcraft.sh())
 
 ## 0x002-敏感函数
 
-### printf
-
-### scanf
-
-### puts
-
-### gets
-
-### read
-
-### write
-
-### strcpy
+|  敏感函数  |  结束标志  |
+|  :----:  | :----:  |
+|  printf  |  \x00  |
+|  scanf  |    |
+|  puts  |    |
+|  gets  |  \x0A  |
+|  read  |    |
+|  write  |    |
+|  strcpy  |    |
+|  strcmp  |  \x00  |
+|  strlen  |  \x00  |
 
 ## 0x003-泄露libc地址
 
@@ -116,3 +114,23 @@ https://www.wangan.com/docs/1081
 |  59  |  execve  |
 
 https://blog.csdn.net/sinat_26227857/article/details/44244433
+
+## 0x006-栈对齐
+
+在ubuntu18以上的版本，64位程序中如果调用system("/bin/sh")，则需要考虑堆栈平衡问题。
+
+因为在ubuntu18以上的版本，64位的程序中调用system函数时，有如下指令
+
+![](2.png)
+
+> movaps : 该指令必须16字节对齐，说明 **$rsp+0x40** 处的地址值必须是16的倍数
+
+那么就需要在调用call system时，保证 **$rsp+0x40** 处的地址值是16的倍数，下图是没对齐的情况
+
+![](3.png)
+
+## 0x007-常用汇编指令
+
+|  汇编语言  |  机器码  |  含义  |
+|  :----:  | :----:  | :----:  |
+|  leave  |  0xc9  | mov esp, ebp; <br> pop ebp; |
