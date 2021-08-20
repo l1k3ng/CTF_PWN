@@ -24,3 +24,4 @@
 |  题目  |  类型  |
 |  :----:  | :----:  |
 |  babyheap_0ctf_2017  |  泄露libc  |
+|  [ZJCTF 2019]EasyHeap  |  覆盖got  |
