@@ -21,6 +21,10 @@ shellcode = asm(shellcraft.sh())
 3. system("$0")
 4. execve("/bin/sh", 0, 0) # syscall rax=59
 
+### 一句话getshell
+
+one_gadget
+
 ## 0x002-敏感函数
 
 |  敏感函数  |  结束标志  |
@@ -132,3 +136,10 @@ https://blog.csdn.net/sinat_26227857/article/details/44244433
 |  汇编语言  |  机器码  |  含义  |
 |  :----:  | :----:  | :----:  |
 |  leave  |  0xc9  | mov esp, ebp; <br> pop ebp; |
+
+## 0x008-Canary绕过
+
+Canary特性：
+
+1. 在同一个程序里，每个函数中的Canary值是一样的，也就是说可以在一个函数中泄漏Canary值，然后在另一个函数中使用Canary值完成栈溢出漏洞利用；
+2. Canary最后两位一定是 "\x00"，也就是说如果函数中存在栈溢出，则可以将Canary的最后两位覆盖掉，那么就可以利用puts等函数将Canary的值打印出来；
