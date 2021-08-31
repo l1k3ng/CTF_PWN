@@ -33,10 +33,11 @@ one_gadget
 |  scanf  |    |
 |  puts  |    |
 |  gets  |  \x0A  |
-|  read  |    |
+|  read  |  \x0A  |
 |  write  |    |
 |  strcpy  |    |
 |  strcmp  |  \x00  |
+|  strncmp  |  比较长度为0则结果为0  |
 |  strlen  |  \x00  |
 
 ## 0x003-泄露libc地址
