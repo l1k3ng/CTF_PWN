@@ -19,6 +19,7 @@
 |  pwn2_sctf_2016  |  整数溢出  |
 |  [Black Watch 入群题]PWN  |  栈迁移  |
 |  pwnable_orw  |  seccomp  |
+|  cmcc_simplerop  |  静态编译构造ROP  |
 
 ### 堆漏洞
 

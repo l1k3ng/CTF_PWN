@@ -111,12 +111,19 @@ https://www.wangan.com/docs/1081
 
 |  系统调用号  |  函数  |
 |  :----:  | :----:  |
-|  0  |  read  |
-|  1  |  write  |
+|  0  |  read(fd, buf, size)  |
+|  1  |  write(fd, buf, size)  |
 |  15  |  rt_sigreturn  |
-|  59  |  execve  |
+|  59  |  execve(cmd, 0, 0)  |
 
 https://blog.csdn.net/sinat_26227857/article/details/44244433
+
+```
+rax 系统调用号
+rbx 参数1
+rcx 参数2
+rdx 参数3
+```
 
 ## 0x006-栈对齐
 
@@ -132,13 +139,7 @@ https://blog.csdn.net/sinat_26227857/article/details/44244433
 
 ![](3.png)
 
-## 0x007-常用汇编指令
-
-|  汇编语言  |  机器码  |  含义  |
-|  :----:  | :----:  | :----:  |
-|  leave  |  0xc9  | mov esp, ebp; <br> pop ebp; |
-
-## 0x008-Canary绕过
+## 0x007-Canary绕过
 
 Canary特性：
 
