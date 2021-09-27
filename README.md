@@ -27,8 +27,5 @@
 |  :----:  | :----:  |
 |  babyheap_0ctf_2017  |  泄露libc  |
 |  [ZJCTF 2019]EasyHeap  |  覆盖got  |
-<<<<<<< HEAD
 |  ciscn_2019_n_3  |  UAF  |
-=======
 |  hitcontraining_uaf  |  UAF  |
->>>>>>> a0eef6ba5fce2a9ec172917d9b7471871c9bc625
