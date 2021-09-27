@@ -21,6 +21,16 @@ shellcode = asm(shellcraft.sh())
 3. system("$0")
 4. execve("/bin/sh", 0, 0) # syscall rax=59
 
+在溢出后，如果调用的是函数的plt地址或者got地址，则需要在栈中存放返回地址，栈中的数据格式如下：
+```
+system_plt + 返回地址 + 参数
+```
+
+如果程序中有直接call system地方，则不需要返回地址，可以直接在栈中放参数，栈中的数据格式如下：
+```
+call_system + 参数
+```
+
 ### 一句话getshell
 
 one_gadget
