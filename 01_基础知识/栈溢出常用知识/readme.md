@@ -21,6 +21,10 @@ shellcode = asm(shellcraft.sh())
 3. system("$0")
 4. execve("/bin/sh", 0, 0) # syscall rax=59
 
+### 一句话getshell
+
+one_gadget
+
 ## 0x002-敏感函数
 
 |  敏感函数  |  结束标志  |
@@ -29,10 +33,11 @@ shellcode = asm(shellcraft.sh())
 |  scanf  |    |
 |  puts  |    |
 |  gets  |  \x0A  |
-|  read  |    |
+|  read  |  \x0A  |
 |  write  |    |
 |  strcpy  |    |
 |  strcmp  |  \x00  |
+|  strncmp  |  比较长度为0则结果为0  |
 |  strlen  |  \x00  |
 
 ## 0x003-泄露libc地址
@@ -106,12 +111,19 @@ https://www.wangan.com/docs/1081
 
 |  系统调用号  |  函数  |
 |  :----:  | :----:  |
-|  0  |  read  |
-|  1  |  write  |
+|  0  |  read(fd, buf, size)  |
+|  1  |  write(fd, buf, size)  |
 |  15  |  rt_sigreturn  |
-|  59  |  execve  |
+|  59  |  execve(cmd, 0, 0)  |
 
 https://blog.csdn.net/sinat_26227857/article/details/44244433
+
+```
+rax 系统调用号
+rbx 参数1
+rcx 参数2
+rdx 参数3
+```
 
 ## 0x006-栈对齐
 
@@ -127,8 +139,9 @@ https://blog.csdn.net/sinat_26227857/article/details/44244433
 
 ![](3.png)
 
-## 0x007-常用汇编指令
+## 0x007-Canary绕过
 
-|  汇编语言  |  机器码  |  含义  |
-|  :----:  | :----:  | :----:  |
-|  leave  |  0xc9  | mov esp, ebp; <br> pop ebp; |
+Canary特性：
+
+1. 在同一个程序里，每个函数中的Canary值是一样的，也就是说可以在一个函数中泄漏Canary值，然后在另一个函数中使用Canary值完成栈溢出漏洞利用；
+2. Canary最后两位一定是 "\x00"，也就是说如果函数中存在栈溢出，则可以将Canary的最后两位覆盖掉，那么就可以利用puts等函数将Canary的值打印出来；
