@@ -6,11 +6,8 @@
 
 ```
 context(arch='amd64', os='linux')
-shellcode = asm(shellcraft.sh())
-```
+# context(arch='i386', os='linux')
 
-```
-context(arch='i386', os='linux')
 shellcode = asm(shellcraft.sh())
 ```
 
@@ -19,7 +16,7 @@ shellcode = asm(shellcraft.sh())
 1. system("/bin/sh")
 2. system("sh")
 3. system("$0")
-4. execve("/bin/sh", 0, 0) # syscall rax=59
+4. execve("/bin/sh", 0, 0) # syscall rax=59/eax=15
 
 在溢出后，如果调用的是函数的plt地址或者got地址，则需要在栈中存放返回地址，栈中的数据格式如下：
 ```
@@ -33,19 +30,21 @@ call_system + 参数
 
 ### 一句话getshell
 
-one_gadget
+one_gadget是指在libc库中存在直接执行execve("/bin/sh", 0, 0)指令的地址，可通过搜索获取其偏移，然后直接调用。
+
+![](3.png)
 
 ## 0x002-敏感函数
 
 |  敏感函数  |  结束标志  |
 |  :----:  | :----:  |
 |  printf  |  \x00  |
-|  scanf  |    |
-|  puts  |    |
-|  gets  |  \x0A  |
-|  read  |  \x0A  |
-|  write  |    |
-|  strcpy  |    |
+|  scanf  |  -  |
+|  puts  |  -  |
+|  gets  |  -  |
+|  read  |  -  |
+|  write  |  -  |
+|  strcpy  |  \x00  |
 |  strcmp  |  \x00  |
 |  strncmp  |  比较长度为0则结果为0  |
 |  strlen  |  \x00  |
@@ -135,6 +134,12 @@ rcx 参数2
 rdx 参数3
 ```
 
+64位系统参数传递规则：
+
+> 当参数少于7个时，参数从左到右放入寄存器: rdi, rsi, rdx, rcx, r8, r9。
+
+> 当参数大于等于7个时，前6个与前面一样，之后的依次从右向左放入栈中（同32位）。
+
 ## 0x006-栈对齐
 
 在ubuntu18以上的版本，64位程序中如果调用system("/bin/sh")，则需要考虑堆栈平衡问题。
@@ -145,11 +150,28 @@ rdx 参数3
 
 > movaps : 该指令必须16字节对齐，说明 **$rsp+0x40** 处的地址值必须是16的倍数
 
-那么就需要在调用call system时，保证 **$rsp+0x40** 处的地址值是16的倍数，下图是没对齐的情况
+那么就需要在调用call system时，保证 **$rsp+0x40** 处的地址值是16的倍数。
 
-![](3.png)
+## 0x007-栈迁移
 
-## 0x007-Canary绕过
+如果程序中存在栈溢出，但是溢出的长度太短，只能覆盖到EBP和返回地址时，那么就需要用到栈迁移技术。
+
+栈迁移需要覆盖EBP制造新栈帧空间，然后利用 **leave ; ret** 两个指令，劫持EIP/RIP，控制程序执行流程。
+
+例如，一个程序的缓冲区到EBP的偏移为offset，则可以通过如下payload，将ebp地址覆盖为new_ebp地址，该new_ebp地址可以是bss段中的地址（如果将新栈空间转移到bss段中，需要注意与got表的位置，尽量往后移），
+最后将返回地址覆盖为 **leave ; ret** 指令的地址。
+```
+payload = b"A" * offset + p64(new_ebp) + p64(leave_ret_addr)
+```
+
+程序函数结束会进行一次 **leave ; ret** 操作，此时会将ebp的值设置为new_ebp，EIP为leave_ret_addr，之后再次执行 **leave ; ret** 操作，就会将new_ebp位置处的第一个值赋值给EBP，第二个值赋值给EIP，也就是说此时需要在new_ebp中构造如下内容：
+```
+payload = p32(new_ebp) + p32(getshell_addr)
+```
+
+之后就可以控制程序执行流程。
+
+## 0x008-Canary绕过
 
 Canary特性：
 
