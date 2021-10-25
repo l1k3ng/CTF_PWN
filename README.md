@@ -1,3 +1,17 @@
+## 基础知识
+
+### 0x001 -- 栈漏洞
+
+[栈漏洞](https://github.com/l1k3ng/CTF_PWN/tree/master/基础知识/栈溢出常用知识)
+
+### 0x002 -- 堆漏洞
+
+[堆漏洞](https://github.com/l1k3ng/CTF_PWN/tree/master/基础知识/堆溢出常用知识)
+
+### 0x002 -- 格式化字符串漏洞
+
+[格式化字符串漏洞](https://github.com/l1k3ng/CTF_PWN/tree/master/基础知识/格式化字符串)
+
 ## 题型归类
 
 ### 格式化字符串漏洞
