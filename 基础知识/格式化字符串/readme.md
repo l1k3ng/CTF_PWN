@@ -24,14 +24,17 @@
 
 例如，可以使用 **p32(0x804c044) + b"%10$n"**，将 4 写入 **0x804c044** 中，因为 **p32(0x804c044)** 打印出来是4个字符；
 
-也可以使用 **p32(atoi_got) + b"%" + str(system_plt-4).encode() + b"c%10$n"** 将 **atoi** 函数的GOT地址修改为 **system** 函数的PLT地址****。
+也可以使用 **p32(atoi_got) + b"%" + str(system_plt-4).encode() + b"c%10$n"** 将 **atoi** 函数的GOT地址修改为 **system** 函数的PLT地址。
 
-pwntools提供了格式化字符串漏洞利用的函数如下：
+pwntools提供了格式化字符串漏洞利用的函数 **fmtstr_payload**：
 ```
-payload = fmtstr_payload(offset, {atoi_got:system_plt})
+pwnlib.fmtstr.fmtstr_payload(offset, writes, numbwritten=0, write_size='byte')
 ```
 
-该函数可将atoi_got地址值改为system_plt。
+1. offset即为栈中指向被改写区域指针相对格式化字符串指针的偏移（作为第几个参数）；
+2. writes是一个字典，为要改写的值和目标值，即用value的值替换掉内存中key指向的区域；
+3. numbwritten即为在之前已经输出的字符数；
+4. write_size为mei每次改写的size，一般使用byte（hhn），以避免程序崩溃或连接断开。
 
 ### 0x003-格式化字符串漏洞未解之疑惑
 
