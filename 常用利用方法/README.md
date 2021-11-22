@@ -63,3 +63,11 @@ pwnlib.fmtstr.fmtstr_payload(offset, writes, numbwritten=0, write_size='byte')
 2. writes是一个字典，为要改写的值和目标值，即用value的值替换掉内存中key指向的区域；
 3. numbwritten即为在之前已经输出的字符数；
 4. write_size为mei每次改写的size，一般使用byte（hhn），以避免程序崩溃或连接断开。
+
+## 0x004-堆溢出利用之泄露地址
+
+1. 通过unsorted bin的特性（如果unsorted bin只有一个bin，它的fd和bk指针会指向同一个地址，这个地址是unsorted bin链表的头部，相对libc固定偏移0x3c4b78），可以先申请一个unsorted bin块，然后释放，通过读取unsorted bin中存放的内容，即可泄露libc地址；
+
+## 0x005-堆溢出利用之伪造堆块
+
+1. 通过利用fastbin attack伪造堆块，将伪造的堆块放在__malloc_hook前，即可覆盖
