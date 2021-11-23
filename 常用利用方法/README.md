@@ -70,4 +70,4 @@ pwnlib.fmtstr.fmtstr_payload(offset, writes, numbwritten=0, write_size='byte')
 
 ## 0x005-堆溢出利用之伪造堆块
 
-1. 通过利用fastbin attack伪造堆块，将伪造的堆块放在__malloc_hook前，即可覆盖
+1. 通过利用fastbin attack伪造堆块，将伪造的堆块放在__malloc_hook前，通过编辑堆块内容，使one_gadget覆盖__malloc_hook中的地址（如何确定__malloc_hook的地址呢？一是可以通过固定偏移，二是通过libc.symbols["__malloc_hook"]查找偏移地址）；

@@ -4,13 +4,9 @@
 
 ![](1.png)
 
-来分析下程序的main函数
+程序中主要的功能函数
 
-![](2.png)
-
-main函数中可以根据输入，进行五种操作，一个一个来看。
-
-### Allocate函数
+**Allocate函数**
 
 ![](3.png)
 
@@ -18,19 +14,19 @@ main函数中可以根据输入，进行五种操作，一个一个来看。
 
 进入Allocate函数后，首先会对堆管理表进行遍历，如果发现有状态为0的空区域，则会根据输入的大小，使用calloc创建一块堆空间，并将创建的堆块信息存入管理表中。
 
-### Fill函数
+**Fill函数**
 
 ![](4.png)
 
 该函数根据输入的序号，在堆管理表中进行搜索，如果该序号对应区域的状态值为1，则会根据输入的大小，对相应的堆块进行写操作。
 
-### Free函数
+**Free函数**
 
 ![](5.png)
 
 该函数根据输入的序号，在堆管理表中进行搜索，如果该序号对应区域的状态值为1，则会释放掉对于的堆区域，并将相应的堆信息置为0。
 
-### Dump函数
+**Dump函数**
 
 ![](6.png)
 
@@ -44,11 +40,9 @@ main函数中可以根据输入，进行五种操作，一个一个来看。
 
 ## 0x003 漏洞利用
 
-对于堆溢出，首先想到的利用方式就是fastbin attack中的fastbin double free。该方式是利用fastbin的特性，在__malloc_hook前伪造堆块，然后将__malloc_hook的地址改写为执行execve("/bin/sh",0,0)函数的地址，这样在调用malloc时，就会执行到execve("/bin/sh",0,0)，从而获取系统权限。
+由于该程序的各种保护全开，因此首先需要泄露libc的地址。这里就需要用到 **unsortedbin**。**unsortedbin** 有一个特性，就是如果 **unsortedbin** 只有一个bin ，它的 **fd** 和 **bk** 指针会指向同一个地址（ **unsortedbin** 链表的头部），这个地址相对 **libc** 固定偏移 **0x3c4b78** ，所以得到这个 **fd** 的值，然后减去固定偏移，即可得到 **libc** 的基地址。
 
-但是由于该程序的各种保护全开，因此首先需要泄露libc的地址。这里就需要用到 **unsortedbin**。**unsortedbin** 有一个特性，就是如果 **unsortedbin** 只有一个bin ，它的 **fd** 和 **bk** 指针会指向同一个地址（ **unsortedbin** 链表的头部），这个地址相对 **libc** 固定偏移 **0x3c4b78** ，所以得到这个 **fd** 的值，然后减去固定偏移，即可得到 **libc** 的基地址。
-
-接下来就根据动态调试来详细分析泄露libc地址以及利用fastbin double free的过程。
+接下来就根据动态调试来详细分析泄露libc地址以及利用fastbin attack的过程。
 
 ### 泄露libc地址
 
@@ -128,7 +122,7 @@ fake_heap = libc_base + 0x3c4aed
 execve_shell = libc_base + 0x4526a
 ```
 
-那么最后就是利用fastbin double free来修改__malloc_hook的地址。从上面发现符合要求的伪造堆块地址可以看到，该堆块的size为0x7f，符合fastbin表中的大小。
+那么最后就是利用fastbin attack来修改__malloc_hook的地址。从上面发现符合要求的伪造堆块地址可以看到，该堆块的size为0x7f，符合fastbin表中的大小。
 
 首先创建一个大小在0x7f-0x80之间的堆块，该堆块会处于chunk4中，然后释放chunk4，再通过编辑chunk2，将chunk4->fd修改为伪造的堆块地址。
 ```
