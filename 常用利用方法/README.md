@@ -68,6 +68,35 @@ pwnlib.fmtstr.fmtstr_payload(offset, writes, numbwritten=0, write_size='byte')
 
 1. 通过unsorted bin的特性（如果unsorted bin只有一个bin，它的fd和bk指针会指向同一个地址，这个地址是unsorted bin链表的头部，相对libc固定偏移0x3c4b78），可以先申请一个unsorted bin块，然后释放，通过读取unsorted bin中存放的内容，即可泄露libc地址；
 
-## 0x005-堆溢出利用之伪造堆块
+## 0x005-堆漏洞利用之任意地址跳转
 
-1. 通过利用fastbin attack伪造堆块，将伪造的堆块放在__malloc_hook前，通过编辑堆块内容，使one_gadget覆盖__malloc_hook中的地址（如何确定__malloc_hook的地址呢？一是可以通过固定偏移，二是通过libc.symbols["__malloc_hook"]查找偏移地址）；
+**__malloc_hook**
+
+malloc函数会首先检查__malloc_hook的值。若不为0则会调用其中的地址。
+
+可以通过fastbin attack攻击malloc_hook，fastbin在分配时并不检查对齐情况，可以将fastbin的fd设置为__malloc_hook-0x23，然后触发fastbin attack分配得到__malloc_hook上方的内存空间，最后将__malloc_hook写入one_gadget得到权限。
+
+**__free_hook**
+
+同__malloc_hook类似，在调用free函数时会先检验__free_hook的值。
+
+但由于__free_hook上方都是0字节，不能直接通过fastbin_attack进行攻击，因此需要通过修改top free_hook上方，之后申请内存至__free_hook，并将内容修改为system或one_gadget地址。
+
+fastbin数组在top chunk指针上方。可以通过free fastbin chunk修改fastbin数组的值使的fastbin attack可以实现。 存在限制要求堆的地址以0x56开头
+
+**__realloc_hook**
+
+有些情况下one_gadget因为环境原因全部都不可用，这时可以通过realloc_hook来调整堆栈环境使one_gadget可用。
+
+realloc函数在函数起始会检查__realloc_hook的值是否为0，不为0则跳转至__realloc_hook指向的地址。__realloc_hook同__malloc_hook相邻，故可通过fastbin attack一同修改两个值。
+
+将__malloc_hook劫持为realloc+offset，__realloc_hook劫持为onegadget，实际运行顺序：
+> malloc -> malloc_hook -> realloc -> realloc_hook -> onegadget
+
+由于realloc函数开头有大量的push指令，可根据情况调整偏移，使用push函数调整堆栈。
+
+**io_overflow**
+
+**io_finish**
+
+**large bin attack修改free_hook**
