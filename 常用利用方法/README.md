@@ -100,3 +100,5 @@ realloc函数在函数起始会检查__realloc_hook的值是否为0，不为0则
 **io_finish**
 
 **large bin attack修改free_hook**
+
+## 0x006-堆漏洞利用之Unlink
