@@ -15,6 +15,7 @@
 |  [pwnable_orw](https://github.com/l1k3ng/CTF_PWN/tree/master/栈相关漏洞题型/pwnable_orw)  |  seccomp  |
 |  [cmcc_simplerop](https://github.com/l1k3ng/CTF_PWN/tree/master/栈相关漏洞题型/cmcc_simplerop)  |  静态编译构造ROP  |
 |  [第五空间_2019_决赛_PWN5](https://github.com/l1k3ng/CTF_PWN/tree/master/栈相关漏洞题型/第五空间_2019_决赛_PWN5)  |  格式化字符串漏洞  |
+|  [axb_2019_fmt64](https://github.com/l1k3ng/CTF_PWN/tree/master/栈相关漏洞题型/axb_2019_fmt64)  |  x64格式化字符串漏洞  |
 
 ## 堆漏洞
 
