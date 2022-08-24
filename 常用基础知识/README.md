@@ -42,8 +42,8 @@ https://blog.csdn.net/sinat_26227857/article/details/44244433
 
 ```
 rax 系统调用号
-rbx 参数1
-rcx 参数2
+rdi 参数1
+rsi 参数2
 rdx 参数3
 ```
 

